@@ -1,0 +1,6 @@
+Estos capitulos estan planeados para ser constantemente actualizados y mantener 
+el estado del arte en los métodos empleados con los objetivos principales de 1) mejorar 
+la precisión y exactitud de las predicciones de suelo, 2) mejorar el nivel de detalle espacial 
+de las predicciones, 3) construir capacidades 
+para habilitar el monitoreo del suelo incrementando 
+la capacidad de actualizar resultados con nuevos y mejores datos. 
