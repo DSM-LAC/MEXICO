@@ -1,6 +1,16 @@
-Estos capitulos estan planeados para ser constantemente actualizados y mantener 
+pagina en construccion
+
+Esta carpeta contiene material adicional del capitulo 31 Cartografia digital de suelos y su desarrollo en Mexico. 
+Este capitulo esta en revision para su publicacion en el segundo tomo de la Geografia de los suelos de Mexico (UNAM ed.). 
+
+Estas subsecciones estan planeadas para ser constantemente actualizados y mantener 
 el estado del arte en los métodos empleados con los objetivos principales de 1) mejorar 
 la precisión y exactitud de las predicciones de suelo, 2) mejorar el nivel de detalle espacial 
-de las predicciones, 3) construir capacidades 
-para habilitar el monitoreo del suelo incrementando 
-la capacidad de actualizar resultados con nuevos y mejores datos. 
+de las predicciones, 3) construir capacidades para habilitar el monitoreo del suelo 
+constantemente actualizando resultados con nuevos y mejores datos. 
+
+E2ph.pdf contiene la version 1 del ejercicio de modelacion del pH en el primer horizonte 
+del suelo. 
+
+code_PH.R contiene la version 1 del codigo empleado para la modelacion de pH en Mexico.
+
