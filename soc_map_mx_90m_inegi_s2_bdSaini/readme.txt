@@ -13,3 +13,5 @@ La carpeta de trabajo donde se encuentran los datos disponibles y covariables de
 https://drive.google.com/drive/folders/1ksBd-4-FJvJOQCpBskRlT_tkcrR0mW5z?usp=sharing 
 
 
+Contacto: Mario Guevara (mguevara@udel.edu), Rodrigo Vargas (rvargas@udel.edu)
+
