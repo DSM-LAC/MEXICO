@@ -12,6 +12,7 @@ La carpeta de trabajo donde se encuentran los datos disponibles y covariables de
 
 https://drive.google.com/drive/folders/1ksBd-4-FJvJOQCpBskRlT_tkcrR0mW5z?usp=sharing 
 
+En esta carpeta encontraremos la serie 2 de INEGI, un mapa de zonas urbanas de INEGI y un mapa de cuerpos de agua de la CONAGUA, las cuales usamos en para generar las figuras de este trabajo. 
 
 Contacto: Mario Guevara (mguevara@udel.edu), Rodrigo Vargas (rvargas@udel.edu)
 
