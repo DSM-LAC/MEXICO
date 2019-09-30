@@ -14,5 +14,6 @@ https://drive.google.com/drive/folders/1ksBd-4-FJvJOQCpBskRlT_tkcrR0mW5z?usp=sha
 
 En esta carpeta encontraremos la serie 2 de INEGI, un mapa de zonas urbanas de INEGI y un mapa de cuerpos de agua de la CONAGUA, las cuales usamos en para generar las figuras de este trabajo. Tambien encontraremos la matriz de regresion empleada en el articulo. Esta pagina es actualizada continuamente para mejorar la calidad de los resultados generados. 
 
-Contacto: Mario Guevara (mguevara@udel.edu), Rodrigo Vargas (rvargas@udel.edu).
+Ayudanos a mejorar este sitio! envia tus dudas o comentarios a los siguientes contactos: 
+Student: Mario Guevara (mguevara@udel.edu), Adviser: Rodrigo Vargas (rvargas@udel.edu).
 
