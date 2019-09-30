@@ -7,8 +7,8 @@ library(caret)
 library(rgdal)
 library(raster)
 #covariate files list
-(lis1 <- list.files(pattern='COV.rds'))
-(lis <- lis1[-c(8,11, 12, 15, 36,39, 40)])
+#lista de covariables
+lis <- readRDS('covariateList.rds')
 
 #r <- raster("soc_predicted_SAINIbd.tif")
 #lim <- readRDS( "gadm36_MEX_2_sp.rds")
