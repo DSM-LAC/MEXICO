@@ -10,6 +10,8 @@ proj4string(shape)<-crs('+proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102
 lim <- readRDS('gadm36_MEX_2_sp.rds')
 lim <- spTransform(lim, CRS(projection(shape)))
 #visualize the points
+#lista de covariables
+lis <- readRDS('covariateList.rds')
 
 #Figure 1
 
@@ -131,11 +133,31 @@ ov <- over(d1, m)
 	print(i)
 }
 
+library(caret)
+trainIndex <- createDataPartition(m1$SOC, p = .70, 
+                                  list = FALSE, 
+                                  times = 1)
+
 ##MODELING
 Train <- m1[ trainIndex,]
 Test  <- m1[-trainIndex,]
 
-##relax line
+
+##Super Learner
+
+library(SuperLearner)
+x <-m1[,1:12]
+x$response <-  m1[,15] 
+
+fit_unique<- CV.SuperLearner(
+				     log1p(x[,13]),
+                                     x[,1:12],	
+                                     V=5,
+                                     SL.library=list("SL.xgboost", "SL.ranger",
+                                                     "SL.ksvm", "SL.kernelKnn" ,"SL.bayesglm"))
+
+plot(fit_unique, Y=log1p(m1[,15])) + theme_bw(base_size=20)
+
 
 library(caret)
 library(raster)
@@ -175,19 +197,21 @@ library(raster)
 #lis <- list.files(pattern='COV.rds')
 #fit <- readRDS('modelRFE.rds')
 fit <- readRDS('model_allData_modelingSainiRFE.rds')
-
-(lis1 <- list.files(pattern='COV.rds'))
-
- (lis <- lis1[-c(8,11, 12, 15, 36,39, 40)])
+#(lis1 <- list.files(pattern='COV.rds'))
+#(lis <- lis1[-c(8,11, 12, 15, 36,39, 40)])
 
 
 
 NA2median <- function(x) replace(x, is.na(x), median(x, na.rm = TRUE))
 
-for(i in 30:length(lis)){
+for(i in 1:length(lis)){
 #i=36
 print(lis[i])
 testing <- readRDS(lis[i])
+	
+#Figure 3, plot the predictors for 1 state
+plot(stack(testing))
+	
 testing@data[] <- lapply(testing@data, NA2median)
 
 
@@ -346,11 +370,11 @@ print(lev[i])
 }
 
 names(results) <- c('estado', 'COS', 'mean', 'min', 'max', 'sd', 'npixeles')
-
+#wrive.csv(results, 'reporteCOSestado.csv')
 #plot
 set.seed(42) 
-r <- read.csv('reporteCOSestado.csv')
 
+r <- read.csv('reporteCOSestado.csv')
 
 r$qnt<- cut(r$COS , breaks=quantile(r$COS),
                                     labels=1:4, include.lowest=TRUE)
