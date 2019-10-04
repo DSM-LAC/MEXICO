@@ -22,6 +22,7 @@ CONAGUA, las cuales usamos en para generar las figuras de este trabajo. Tambien 
 empleada en el articulo. Esta pagina es actualizada continuamente para mejorar la calidad de los resultados generados. 
 La version mas actual del trabajo es: revised_review_1.pdf (Septiembre, 2019).
 
-Ayudanos a mejorar este sitio! envia tus dudas o comentarios a los siguientes contactos: 
-Student: Mario Guevara (mguevara@udel.edu), Adviser: Rodrigo Vargas (rvargas@udel.edu).
+Dudas o comentarios: 
+Mario Guevara (mguevara@udel.edu)
+Rodrigo Vargas (rvargas@udel.edu).
 
