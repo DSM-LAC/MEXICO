@@ -487,6 +487,7 @@ err <- raster("RFE_residuals_bd_saini.tif")
 err <- expm1(err)
 err <- pred/err
 xxx[xxx>100] <- 100
+extent()
 plot(hill, col=grey(0:100/100), legend=FALSE, main='', cex.axis=1.5)
 plot(xxx,  col=rev(heat.colors(100, alpha=0.50)), add=TRUE)
 plot(sh[e,], col='black', border=NA, add=TRUE)
@@ -495,6 +496,40 @@ maps::map('world', add=TRUE)
 scalebar(500, below="kilometers", type='bar', lonlat=TRUE, divs=5, xy=click())
 
 
+
+##crops visualize smaller areas
+library(raster)
+library(rgeos)
+points <- SpatialPoints(cbind(-100, 25))
+pbuf <- gBuffer(points, widt=1)
+#plot(pbuf, add=TRUE, col='green')
+#alt <- getData('alt', country='MEX')
+#hill <- hillShade(slope, aspect, 40, 270)
+
+cr <- mask(crop(raster('soc_predicted_SAINIbd.tif'), pbuf), pbuf)
+cr <- trim(cr)
+cr2 <- mask(crop(raster("RFE_residuals_bd_saini.tif"), pbuf), pbuf)
+cr2 <- trim(cr2)
+cr3 <- mask(crop(hill, pbuf), pbuf)
+cr3 <- trim(cr3)
+proj4string(pbuf) <- CRS(projection(sh))
+
+plot(cr3, col=grey(0:100/100), legend=FALSE, main='', cex.axis=1.5)
+plot(cr2,  col=rev(heat.colors(100, alpha=0.50)), add=TRUE)#col=rainbow(25, alpha=0.35)
+plot(sh[pbuf,], col='black', border=NA, add=TRUE)
+plot(sh2[pbuf,], col='blue', border=NA, add=TRUE)
+plot(pbuf, add=TRUE, cex=5)
+#maps::map('world', add=TRUE)
+#scalebar(50, below="kilometers", type='bar', lonlat=TRUE, divs=5, xy=click())
+
+
+plot(cr3, col=grey(0:100/100), legend=FALSE, main='', cex.axis=1.5)
+plot(cr,  col=rainbow(25, alpha=0.35), add=TRUE)
+plot(sh[pbuf,], col='black', border=NA, add=TRUE)
+plot(sh2[pbuf,], col='blue', border=NA, add=TRUE)
+#maps::map('world', add=TRUE)
+plot(pbuf, add=TRUE, cex=5)
+#scalebar(50, below="kilometers", type='bar', lonlat=TRUE, divs=5, xy=click())
 
 
 
