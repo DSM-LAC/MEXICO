@@ -88,9 +88,9 @@ xyplot(top ~ p.q50 | variable, data=agg, ylab='Profundidad (cm)',
              lower=agg$p.q25, upper=agg$p.q75, ylim=c(105,-2),
              panel=panel.depth_function,
              alpha=0.25, sync.colors=TRUE,
-             par.settings=list(superpose.line=list(col=c('darkgray'), lwd=2)),
+             par.settings=list(superpose.line=list(col=c('brown'), lwd=2)),
              prepanel=prepanel.depth_function,
-             cf=agg$contributing_fraction, cf.col='black', cf.interval=5, 
+             cf=agg$contributing_fraction, cf.col='brown', cf.interval=5, 
              layout=c(3, 1), strip=strip.custom(bg=grey(0.8)),
              scales=list(x=list(tick.number=4, cex=1.5,alternating=3, relation='free'), y=list(cex=1.5))
              )
@@ -468,12 +468,29 @@ plot(res2, col=colorRampPalette(c("gray100","gray" , "orange",'firebrick1'))(255
 
 plot(r2, col=colorRampPalette(c("azure","darkgray" ,"gold4", "orange",'firebrick1'))(255), cex.axis=1.5, legend.only=TRUE)
 
+sh <- shapefile('agebur15gw.shp')
+sh2 <- shapefile('C_A_Etapa_I_a_VI_2016actual.shp')
 
+e <- extent(hill)
+e <- as(e, 'SpatialPolygons')
+proj4string(e) <- CRS(projection(sh))
+sh2 <- spTransform(sh2, CRS(projection(sh)))
+ 
+plot(hill, col=grey(0:100/100), legend=FALSE, main='', cex.axis=1.5)
+plot(raster('soc_predicted_SAINIbd.tif'), col=rainbow(25, alpha=0.35), add=TRUE)
 plot(sh[e,], col='black', border=NA, add=TRUE)
 plot(sh2[e,], col='blue', border=NA, add=TRUE)
-map('world', add=TRUE)
-scalebar(below="kilometers", type='bar', lonlat=TRUE, divs=2, xy=click())
+maps::map('world', add=TRUE)
+scalebar(500, below="kilometers", type='bar', lonlat=TRUE, divs=5, xy=click())
 
+err <- raster("RFE_residuals_bd_saini.tif")
+
+plot(hill, col=grey(0:100/100), legend=FALSE, main='', cex.axis=1.5)
+plot((raster('soc_predicted_SAINIbd.tif')/err)*(100), col=rainbow(25, alpha=0.35), add=TRUE)
+plot(sh[e,], col='black', border=NA, add=TRUE)
+plot(sh2[e,], col='blue', border=NA, add=TRUE)
+maps::map('world', add=TRUE)
+scalebar(500, below="kilometers", type='bar', lonlat=TRUE, divs=5, xy=click())
 
 
 
