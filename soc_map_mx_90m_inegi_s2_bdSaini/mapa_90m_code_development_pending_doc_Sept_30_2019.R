@@ -484,9 +484,11 @@ maps::map('world', add=TRUE)
 scalebar(500, below="kilometers", type='bar', lonlat=TRUE, divs=5, xy=click())
 
 err <- raster("RFE_residuals_bd_saini.tif")
-
+err <- expm1(err)
+err <- pred/err
+xxx[xxx>100] <- 100
 plot(hill, col=grey(0:100/100), legend=FALSE, main='', cex.axis=1.5)
-plot((raster('soc_predicted_SAINIbd.tif')/err)*(100), col=rainbow(25, alpha=0.35), add=TRUE)
+plot(xxx,  col=rev(heat.colors(100, alpha=0.50)), add=TRUE)
 plot(sh[e,], col='black', border=NA, add=TRUE)
 plot(sh2[e,], col='blue', border=NA, add=TRUE)
 maps::map('world', add=TRUE)
