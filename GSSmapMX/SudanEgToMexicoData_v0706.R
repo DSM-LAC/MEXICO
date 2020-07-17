@@ -114,6 +114,7 @@ predictors@data$PCA8=Pred.pcs[,8]
 ####
 
 
+
 #libraries
 library(raster)
 library(rgdal)
@@ -168,7 +169,10 @@ summary(dat$CE030)
 soil1=subset(dat,!is.na(dat$CE030))
 coordinates(soil1) <- ~ X+Y
 proj4string(soil1)<-crs('+proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102 +x_0=2500000 +y_0=0 +ellps=WGS84 +units=m +no_defs')
-soil1 <- spTransform(soil1, CRS(projection(predictors)))
+
+predictors_b <- readRDS('predictors_mx_soil_map.rds')
+
+soil1 <- spTransform(soil1, CRS(projection(predictors_b)))
 
 
 bubble(soil1,"CE030", main="Harmonized Electrical Conductivity (0-30 cm)")
@@ -184,25 +188,83 @@ soil1$dummy=(soil1$CE30100)+0.001# add "+0.001" if minimum in summary(soil1$CE03
 hist(soil1$dummy, main="Frequency distribution (before transformation)", xlab="Harmonized EC (dS/m)")
 soil1$Tran2=(soil1$dummy^(as.numeric(car::powerTransform(soil1$dummy, family ="bcPower")["lambda"]))-1)/(as.numeric(car::powerTransform(soil1$dummy, family ="bcPower")["lambda"]))
 hist(soil1$Tran2, main="Frequency distribution (after transformation)",xlab="Harmonized EC (dS/m)")
-crs(predictors); crs(soil1)
+crs(predictors_b); crs(soil1)
 
 
 #####
+dummyRaster <- function(rast){
+  rast <- as.factor(rast)
+  result <- list()
+  for(i in 1:length(levels(rast)[[1]][[1]])){
+    result[[i]] <- rast == levels(rast)[[1]][[1]][i]
+    names(result[[i]]) <- paste0(names(rast), 
+                                 levels(rast)[[1]][[1]][i])
+  }
+  return(stack(result))
+}
+
+soil_map <- shapefile('inputs/mapa_suelos/eda251mcw.shp')
 
 
+ref <- projectRaster(raster(predictors), crs=projection(soil_map))
+soil_map$des <- as.factor(soil_map$DESCRIPCIO)
+soilmap <- rasterize(soil_map, ref, "des")
+writeRaster(soilmap, file='soil_map_rasterized_DESCRIPCIO.tif')
 
-predictors.ov=over(soil1, predictors)
+library(raster)
+soilmap <- raster('soil_map_rasterized_DESCRIPCIO.tif')
+soilmap_dummy <- dummyRaster(soilmap)
+
+saveRDS(predictors, file='predictors_mx.rds')
+
+predictors <- readRDS('predictors_mx.rds')
+
+predictors_b <- as(stack(stack(predictors), projectRaster(soilmap_dummy,raster(predictors))), 'SpatialGridDataFrame'); saveRDS(predictors, file='predictors_mx_soil_map.rds')
+
+predictors.ov=over(soil1, predictors_b)
 soil1@data <- cbind(soil1@data, data.frame(predictors.ov) )
 
-soil1a=soil1@data[,c("Tran", names(predictors))]
+soil1a=soil1@data[,c("Tran", names(predictors_b))]
+soil1a <- na.omit(as.data.frame(soil1a))
 
+ soil1a <- soil1a[, colSums(soil1a != 0) > 0]
 #regmodelSuit(soil1a,Tran , dem , max_temp , mean_temp , lcover , min_temp , precipitation , swir1 , swir2 , BBlue , BGreen , BRed , BIRed , SI1 , SI2 , SI3 , SI4 , SI5 , SI6 , SAVI , VSSI , NDSI , NDVI , SR , CRSI , BI , PCA1 , PCA2 , PCA3 , PCA4 , PCA5 , PCA6 , PCA7 , PCA8)
 
 #Tran + dem + max_temp + mean_temp + lcover + min_temp + precipitation + swir1 + swir2 + BBlue + BGreen + BRed + BIRed + SI1 + SI2 + SI3 + SI4 + SI5 + SI6 + SAVI + VSSI + NDSI + NDVI + SR + CRSI + BI + PCA1 + PCA2 + PCA3 + PCA4 + PCA5 + PCA6 + PCA7 + PCA8
 
-rf.ec=train(Tran~(dem + max_temp + mean_temp + lcover + min_temp + precipitation + swir1 + swir2 + BBlue + BGreen + BRed + BIRed + SI1 + SI2 + SI3 + SI4 + SI5 + SI6 + SAVI + VSSI + NDSI + NDVI + SR + CRSI + BI + PCA1 + PCA2 + PCA3 + PCA4 + PCA5 + PCA6 + PCA7 + PCA8),  data = soil1a,  method = "qrf", trControl=trainControl( method = "cv",number=5,returnResamp = "all",savePredictions = TRUE, search = "random",verboseIter = FALSE))
+control <- rfeControl(functions=rfFuncs, method="repeatedcv", number=5, repeats=2)
+# run the RFE algorithm
+results <- rfe(soil1a[1], soil1a[-1], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
 
-print(rf.ec)
+
+library(SuperLearner)
+fit_cv<- CV.SuperLearner(
+				     soil1a[,1],
+                                     soil1a[-1],	
+                                     V=5,
+                                     SL.library=list("SL.xgboost", "SL.ranger",
+                                                     "SL.ksvm", "SL.kernelKnn" ,"SL.bayesglm"))
+
+
+ranger.ec=train(Tran~(dem + max_temp + mean_temp + lcover + min_temp + precipitation + swir1 + swir2 + BBlue + BGreen + BRed + BIRed + SI1 + SI2 + SI3 + SI4 + SI5 + SI6 + SAVI + VSSI + NDSI + NDVI + SR + CRSI + BI + PCA1 + PCA2 + PCA3 + PCA4 + PCA5 + PCA6 + PCA7 + PCA8),  data = soil1a,  method = "ranger", trControl=trainControl( method = "cv",number=5,returnResamp = "all",savePredictions = TRUE, search = "random",verboseIter = FALSE))
+
+# Compute R^2 from true and predicted values
+eval_results <- function(true, predicted, df) {
+  SSE <- sum((predicted - true)^2)
+  SST <- sum((true - mean(true))^2)
+  R_square <- 1 - SSE / SST
+  RMSE = sqrt(SSE/nrow(df))
+
+  
+  # Model performance metrics
+data.frame(
+  RMSE = RMSE,
+  Rsquare = R_square
+)
+  
+}
 
 
 
