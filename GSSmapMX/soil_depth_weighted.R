@@ -1,4 +1,5 @@
-#Pilar Durante
+#Elaborado por Pilar Durante en la Universidad,
+#Adaptado por Mario Guevara
 
 ####################RANGO DE 0-20cm###########
 dat <- readRDS("D:/_Pitu/_Tesis2016/_Tesis_PD/Bases de datos/_4Murcia/_BD/dat_subsetPrueba.rds")
