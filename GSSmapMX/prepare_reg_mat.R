@@ -70,10 +70,11 @@ hist(soil1$Tran2, main="Frequency distribution (after transformation)",xlab="Har
 crs(predictors_b); crs(soil1)
 
 predictors.ov=over(soil1, predictors_b)
-soil1@data <- cbind(soil1@data, data.frame(predictors.ov) )
+soil1@data <- cbind(soil1@data, soil1@coords ,data.frame(predictors.ov) )
 
-soil1a=soil1@data[,c("Tran", names(predictors_b))]
+soil1a=soil1@data[,c('X', 'Y', "Tran", names(predictors_b))]
+
 soil1a <- na.omit(as.data.frame(soil1a))
 soil1a <- soil1a[, colSums(soil1a != 0) > 0]
 
-write.csv(soil1a, file='outputs/regression_matrix_EC_tran_0_30cm.csv')
+write.csv(soil1a, file='regression_matrix_EC_tran_0_30cm.csv')
