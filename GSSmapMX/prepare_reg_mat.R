@@ -2,12 +2,13 @@
 library(raster)
 library(rgdal)
 #read dataset in a shapefile 
-shape <- readOGR(dsn='inputs/datos_inegi/', layer="edaf_puntos_sii")
+shape <- readOGR(dsn=getwd(), layer="edaf_puntos_sii")
 proj4string(shape)<-crs('+proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102 +x_0=2500000 +y_0=0 +ellps=WGS84 +units=m +no_defs')
 #MexiCE limit 
 #CEuntry limit from the global administrative areas project\
 #https://gadm.org/
-lim <- readRDS('gadm36_MEX_2_sp.rds')
+lim <- getData('GADM', country='MEX', level=2)
+#lim <- readRDS('gadm36_MEX_2_sp.rds')
 lim <- spTransform(lim, CRS(projection(shape)))
 #visualize the points
 #and histograms
