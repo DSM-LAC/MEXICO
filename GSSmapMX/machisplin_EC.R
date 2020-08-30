@@ -1,4 +1,5 @@
 #libraries
+library(spatialEco)
 library(raster)
 library(rgdal)
 #read dataset in a shapefile 
@@ -73,13 +74,15 @@ predictors.ov=over(soil1, predictors_b)
 soil1@data <- cbind(soil1@data, soil1@coords ,data.frame(predictors.ov) )
 
 soil1a=soil1@data[,c('X', 'Y', "Tran", names(predictors_b))]
+soil1a=soil1@data[,c('X', 'Y', "Tran2", names(predictors_b))]
 
 soil1a <- na.omit(as.data.frame(soil1a))
 soil1a <- soil1a[, colSums(soil1a != 0) > 0]
 
 
 lim_g <- spTransform(lim, CRS(projection(predictors_b)))
-Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$Tran) 
+Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$Tran2) 
+Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$Tran2) 
 raster_stack <- stack(predictors_b)
 #raster_stack <- aggregate(raster_stack, 5, mean)
 raster_stack <- mask(raster_stack, lim_g)
@@ -89,10 +92,10 @@ interp.rast<-machisplin.mltps(int.values=Mydata, covar.ras=raster_stack, n.cores
 #interp.rast <- readRDS('machinspline_CE_model_result.rds')
 library(car)
 lmbda1=(as.numeric(powerTransform(soil1$dummy, family ="bcPower")["lambda"]))
-pred_sc <- raster.transformation(interp.rast[[1]]$final, min(Mydata$Tran), max(Mydata$tran),  trans = 'stretch')
-pred_sc <- (pred_sc*lmbda1+1)^(1/lmbda1)
+pred_sc <- (interp.rast[[1]]$final*lmbda1+1)^(1/lmbda1)
+pred_sc_2 <- raster.transformation(pred_sc, min(soil1$CE030), max(soil1$CE030),  trans = 'stretch')
+#
 library(wesanderson)
-
-plot(pewd_sc, col= viridis::viridis(10), zlim=c(0,1), legend=FALSE)
+plot(pred_sc, col= viridis::viridis(10), zlim=c(0,1), legend=FALSE)
  
 legend("topright", legend = c("EC"), fill = viridis::viridis(10)))
