@@ -73,7 +73,7 @@ crs(predictors_b); crs(soil1)
 predictors.ov=over(soil1, predictors_b)
 soil1@data <- cbind(soil1@data, soil1@coords ,data.frame(predictors.ov) )
 
-soil1a=soil1@data[,c('X', 'Y', "Tran", names(predictors_b))]
+#soil1a=soil1@data[,c('X', 'Y', "Tran", names(predictors_b))]
 soil1a=soil1@data[,c('X', 'Y', "Tran2", names(predictors_b))]
 
 soil1a <- na.omit(as.data.frame(soil1a))
@@ -93,9 +93,16 @@ interp.rast<-machisplin.mltps(int.values=Mydata, covar.ras=raster_stack, n.cores
 library(car)
 lmbda1=(as.numeric(powerTransform(soil1$dummy, family ="bcPower")["lambda"]))
 pred_sc <- (interp.rast[[1]]$final*lmbda1+1)^(1/lmbda1)
-pred_sc_2 <- raster.transformation(pred_sc, min(soil1$CE030), max(soil1$CE030),  trans = 'stretch')
+pred_sc_2 <- raster.transformation(pred_sc, min(na.omit(soil1$CE30100)),max(na.omit(soil1$CE30100)),  trans = 'stretch')
 #
 library(wesanderson)
 plot(pred_sc, col= viridis::viridis(10), zlim=c(0,1), legend=FALSE)
- 
+
 legend("topright", legend = c("EC"), fill = viridis::viridis(10)))
+
+#saveRDS(interp.rast, file='EC_030_machisplin_model_object.rds')
+#writeRaster(stack(pred_sc, pred_sc_2), "EC_030_machisplin_prediction_prediction_scaled.tif")
+
+saveRDS(interp.rast, file='EC_30100_machisplin_model_object.rds')
+writeRaster(stack(pred_sc, pred_sc_2), "EC_30100_machisplin_prediction_prediction_scaled.tif")
+
