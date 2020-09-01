@@ -3,7 +3,8 @@ library(spatialEco)
 library(raster)
 library(rgdal)
 #read dataset in a shapefile 
-shape <- readOGR(dsn=getwd(), layer="edaf_puntos_sii")
+#shape <- readOGR(dsn=getwd(), layer="edaf_puntos_sii")
+shape <- readOGR(dsn='/home/mguevara/Downloads/mapa_salinidad_mx/inputs/datos_inegi/', layer="edaf_puntos_sii")
 proj4string(shape)<-crs('+proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102 +x_0=2500000 +y_0=0 +ellps=WGS84 +units=m +no_defs')
 #MexiCE limit 
 #CEuntry limit from the global administrative areas project\
@@ -63,16 +64,16 @@ crs(predictors_b); crs(soil1)
 predictors.ov=over(soil1, predictors_b)
 soil1@data <- cbind(soil1@data, soil1@coords ,data.frame(predictors.ov) )
 
-soil1a=soil1@data[,c('X', 'Y', "PH030", names(predictors_b))]
-#soil1a=soil1@data[,c('X', 'Y', "Tran2", names(predictors_b))]
+#soil1a=soil1@data[,c('X', 'Y', "PH030", names(predictors_b))]
+soil1a=soil1@data[,c('X', 'Y', "PH30100", names(predictors_b))]
 
 soil1a <- na.omit(as.data.frame(soil1a))
 soil1a <- soil1a[, colSums(soil1a != 0) > 0]
 
 
 lim_g <- spTransform(lim, CRS(projection(predictors_b)))
-Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$PH030) 
-#Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$Tran2) 
+#Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$PH030) 
+Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$PH30100) 
 raster_stack <- stack(predictors_b)
 #raster_stack <- aggregate(raster_stack, 5, mean)
 raster_stack <- mask(raster_stack, lim_g)
@@ -90,8 +91,8 @@ plot(pred_sc_2, col= viridis::viridis(10), zlim=c(0,1), legend=FALSE)
 
 legend("topright", legend = c("pH"), fill = viridis::viridis(10)))
 
+saveRDS(interp.rast, file='PH_30100_machisplin_model_object.rds')
+writeRaster(stack(pred_sc, pred_sc_2), "PH_30100_machisplin_prediction_prediction_scaled.tif")
+
 #saveRDS(interp.rast, file='PH_030_machisplin_model_object.rds')
 #writeRaster(stack(pred_sc, pred_sc_2), "PH_030_machisplin_prediction_prediction_scaled.tif")
-
-saveRDS(interp.rast, file='PH_030_machisplin_model_object.rds')
-writeRaster(stack(pred_sc, pred_sc_2), "PH_030_machisplin_prediction_prediction_scaled.tif")
