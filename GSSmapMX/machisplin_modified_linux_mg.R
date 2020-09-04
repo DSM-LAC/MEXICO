@@ -750,7 +750,7 @@ if(n.spln>1){i<-seq(1,n.spln)} else {i<-1}# length = number of climate variables
 				#calculate pred at normal scale, suming up kriging pred+res
 				pred.elev.i<- brick(pred.elev, final.TPS)
 				pred.elev.i.calc<- calc(pred.elev.i, fun=sum)
-				writeRaster(pred.elev.i.calc, file=outmap , overwrite=TRUE)
+				writeRaster(pred.elev.i.calc, file='PH_30100_machisplin_prediction_prediction_scaled.tif' , overwrite=TRUE)
 				#extract final values to input points from final raster
 				f.actual<-extract(pred.elev.i.calc, dat_tps[[i]][,n.covars:(n.covars+1)])#lat and long input
             
