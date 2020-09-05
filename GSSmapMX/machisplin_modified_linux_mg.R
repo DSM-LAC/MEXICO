@@ -37,13 +37,19 @@ proj4string(sp4)<-crs('+proj=lcc +lat_1=17.5 +lat_2=29.5 +lat_0=12 +lon_0=-102 +
 library(GSIF)
 try(CE<- mpspline(sp4, 'CE', d = t(c(0,30,100,150))))
 try(PH <- mpspline(sp4, 'PH', d = t(c(0,30,100,150))))
+try(SNA <- mpspline(sp4, 'SNA', d = t(c(0,30,100,150))))
 dat <- data.frame(id = sp4@site$IDPROF,
 X = sp4@sp@coords[,1],
 Y = sp4@sp@coords[,2],
 CE030 = CE$var.std[,1],
 PH030 = PH$var.std[,1],
 CE30100 = CE$var.std[,2],
-PH30100 = PH$var.std[,2])
+PH30100 = PH$var.std[,2],
+SNA030 = SNA$var.std[,1],
+SNA30100 = SNA$var.std[,2])
+
+saveRDS(dat, 'inegi_s2_salinity_dataset.rds')
+dat <- readRDS('inegi_s2_salinity_dataset.rds')
 
 #hist(dat$PH030)
 summary(dat$PH030)
@@ -61,16 +67,16 @@ crs(predictors_b); crs(soil1)
 predictors.ov=over(soil1, predictors_b)
 soil1@data <- cbind(soil1@data, soil1@coords ,data.frame(predictors.ov) )
 
-#soil1a=soil1@data[,c('X', 'Y', "PH030", names(predictors_b))]
-soil1a=soil1@data[,c('X', 'Y', "PH30100", names(predictors_b))]
+soil1a=soil1@data[,c('X', 'Y', "SNA030", names(predictors_b))]
+#soil1a=soil1@data[,c('X', 'Y', "SNA30100", names(predictors_b))]
 
 soil1a <- na.omit(as.data.frame(soil1a))
 soil1a <- soil1a[, colSums(soil1a != 0) > 0]
 
 
 lim_g <- spTransform(lim, CRS(projection(predictors_b)))
-#Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$PH030) 
-Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$PH30100) 
+Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$SNA030) 
+#Mydata <- data.frame(long=soil1a$X, lat=soil1a$Y, Tran=soil1a$SNA30100) 
 raster_stack <- stack(predictors_b)
 #raster_stack <- aggregate(raster_stack, 5, mean)
 raster_stack <- mask(raster_stack, lim_g)
@@ -79,7 +85,7 @@ raster_stack <- mask(raster_stack, lim_g)
 
 
 library(MACHISPLIN)
-outmap <- 'PH_30100_machisplin_prediction_prediction_scaled.tif'
+
 #import nlme
 #snowfall, snow, 
 
@@ -750,7 +756,7 @@ if(n.spln>1){i<-seq(1,n.spln)} else {i<-1}# length = number of climate variables
 				#calculate pred at normal scale, suming up kriging pred+res
 				pred.elev.i<- brick(pred.elev, final.TPS)
 				pred.elev.i.calc<- calc(pred.elev.i, fun=sum)
-				writeRaster(pred.elev.i.calc, file='PH_30100_machisplin_prediction_prediction_scaled.tif' , overwrite=TRUE)
+				writeRaster(pred.elev.i.calc, file='SNA_030_machisplin_prediction_prediction_scaled.tif' , overwrite=TRUE)
 				#extract final values to input points from final raster
 				f.actual<-extract(pred.elev.i.calc, dat_tps[[i]][,n.covars:(n.covars+1)])#lat and long input
             
@@ -824,4 +830,20 @@ return(f)
 }
 interp.rast <- machisplin.mltps_a(int.values=Mydata, covar.ras=raster_stack, n.cores=1, tps=TRUE)
 
+library(car)
+(interp.rast[[1]]$final)
+(pred_sc <- raster('SNA_030_machisplin_prediction_prediction_scaled.tif'))
+pred_sc_2 <- raster.transformation(pred_sc, min(na.omit(soil1$SNA30100)),max(na.omit(soil1$SNA30100)),  trans = 'stretch')
+#
+library(wesanderson)
+plot(pred_sc_2, col= viridis::viridis(10), zlim=c(0,1), legend=FALSE)
+
+legend("topright", legend = c("SNA"), fill = viridis::viridis(10)))
+
+saveRDS(interp.rast, file='SNA_030_machisplin_model_object.rds')
+writeRaster(stack(pred_sc, pred_sc_2), "SNA_030_machisplin_prediction_prediction_scaled.tif", overwrite=TRUE)
+
+
+				     
+				 
 				     
