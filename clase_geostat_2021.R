@@ -12,10 +12,21 @@
 #'y el tema es variogramas.
 #'El objetivo de este codigo es dejar evidencia reproducible de resultados de analisis de variogramas
 #'con datos de respiracion de suelos a diversas escalas de trabajo, con diferentes configuraciones de 
-#'datos disponibles y a lo largo de diversos escenarios naturales
+#'datos disponibles y a lo largo de diversos escenarios naturales.  
 #'Feb, 2021
+
 #+ <p>&nbsp;</p>
 #+ <p>&nbsp;</p>
+
+#' Metodologia:
+#' Bases de datos
+
+
+#+ <p>&nbsp;</p>
+#+ <p>&nbsp;</p>
+
+
+
 #'pregunta a R donde estamos
 #+ , attr.source='.numberLines'
 getwd()
@@ -64,5 +75,6 @@ plot(variogram)
 
 #'library(automap)
 
-
+#' con esta linea hacen el pdf 
+#' rmarkdown::render("copy_codigo_render.R")
 
