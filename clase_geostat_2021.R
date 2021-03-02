@@ -1,5 +1,5 @@
 #' ---
-#' title: "Clase geostat 2021 PCT"
+#' title: "Variografia de la respiracion de suelos ..."
 #' author: "Ovalle, Ramos, Guevara, 2021"
 #' output:
 #'   pdf_document:
@@ -38,31 +38,53 @@ setwd("/Users/marioguevara/Downloads/clase")
 library(raster)
 library(rgdal)
 library(automap)
+library(gstat)
 #'pregunta a R como funciona getData
 #'?getData
 #'descarga limite de pais
 
-lim <- getData('GADM', country='MEX', level=2)
-#'que tipo de objeto es este?
-
+lim <- getData('GADM', country='COL', level=2)
+#'library for global base maps
 library(maps)
+#show the map
 map('world')
+
+#'que tipo de objeto es este?
 
 class(lim)
 #'leer la base de datos de trabajo
 
 srdb <- read.csv('https://raw.githubusercontent.com/bpbond/srdb/master/srdb-data.csv')
-
+class(srdb)
+str(srdb)
+str(srdb)
 #'nombres de las variables en base de datos 
-
+plot(srdb$Longitude, srdb$Latitude)
+#'sobrepongan puntos
+points(soilCN$Longitude, soilCN$Latitude, col='blue')
  names(srdb)
- #'selecciona variables especificas de otra base de datos
+  soilCN <-  srdb[c('Longitude' , 'Latitude', 'Soil_CN')]
+#'resumen de la base de datos
+summary(soilCN)
+#'selecciona variables especificas de otra base de datos
+ #'plot(soilCN$Longitude, soilCN$Latitude)
  
- soilCN <-  srdb[c('Longitude' , 'Latitude', 'Soil_CN')]
+ #' conocer la distribucion estadistica de los datos
+hist(soilCN$Soil_CN)
+
+hist(log1p(soilCN$Soil_CN))
+
+soilCN$Soil_CN_log <- log1p(soilCN$Soil_CN)
+
+#desviacion standard
+apply(soilCN, 2, sd)
+class(soilCN)
 #'quitamos valores no asignados
 soilCN <- na.omit(soilCN)
  #'define un objeto espacial
  coordinates(soilCN) <- ~ Longitude + Latitude
+ #'define CRS
+ proj4string(soilCN) <- ~ '+proj=longlat +datum=WGS84'
   library(automap)
  #+ results=FALSE, warnings=FALSE
 variogram = autofitVariogram(Soil_CN ~1, soilCN)
@@ -78,6 +100,5 @@ plot(variogram)
 
 #'library(automap)
 
-#' con esta linea hacen el pdf 
-#' rmarkdown::render("copy_codigo_render.R")
+
 
