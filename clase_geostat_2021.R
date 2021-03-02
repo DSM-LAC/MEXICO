@@ -45,6 +45,9 @@ library(automap)
 lim <- getData('GADM', country='MEX', level=2)
 #'que tipo de objeto es este?
 
+library(maps)
+map('world')
+
 class(lim)
 #'leer la base de datos de trabajo
 
