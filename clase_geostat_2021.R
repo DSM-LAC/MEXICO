@@ -31,10 +31,12 @@
 #+ , attr.source='.numberLines'
 getwd()
 #'definir directorio de trabajo
+#+, attr.source='.numberLines startFrom="2"'
 setwd("/Users/marioguevara/Downloads/clase")
 #'librarias necesarias
 
 #'install.packages(c('raster', 'automap', 'rgdal'))
+#+, attr.source='.numberLines startFrom="3"'
 library(raster)
 library(rgdal)
 library(automap)
@@ -42,7 +44,7 @@ library(gstat)
 #'pregunta a R como funciona getData
 #'?getData
 #'descarga limite de pais
-
+#+, attr.source='.numberLines startFrom="7"'
 lim <- getData('GADM', country='COL', level=2)
 #'library for global base maps
 library(maps)
@@ -68,7 +70,7 @@ summary(soilCN)
  #'nombres de las variables en base de datos 
  plot(srdb$Longitude, srdb$Latitude)
 #'sobrepongan puntos
-plot(soilCN$Longitude, soilCN$Latitude, add=TRUE, col='blue')
+#'points(soilCN$Longitude, soilCN$Latitude, col='blue')
 #'quitamos valores no asignados
 soilCN <- na.omit(soilCN)
  #' conocer la distribucion estadistica de los datos
@@ -77,6 +79,8 @@ hist(soilCN$Soil_CN)
 hist(log1p(soilCN$Soil_CN))
 #'agregamos una columna con los datos transformados
 soilCN$Soil_CN_log <- log1p(soilCN$Soil_CN)
+#'resumen estadistico
+summary(soilCN)
 #desviacion standard
 apply(soilCN, 2, sd)
  #'define un objeto espacial
@@ -85,13 +89,34 @@ apply(soilCN, 2, sd)
  proj4string(soilCN) <- CRS( '+proj=longlat +datum=WGS84')
   library(automap)
  #+ results=FALSE, warnings=FALSE
-variogram = autofitVariogram(Soil_CN ~1, soilCN)
+variogram <- autofitVariogram(Soil_CN ~ 1, soilCN)
+
+plot(Soil_CN)
+
+names(variogram)
+ df <- data.frame(variogram$exp_var)
+ 
+ #varianza minima
+ #nugget sill radio
+ #tipo de modelo
+ #correlacion
+  soilCN_aoi_1 <- crop(soilCN, drawExtent())
+ soilCN_aoi_1 <- crop(soilCN, drawExtent())
+
+ 
+dim(soilCN)
+cor(df$dist, df$gamma)
+variogram$sserr
+
+
+tratamiento <- c('logTransformed')
+
 #'visualize the variogram
 plot(variogram)
 
 x <- soilCN
 x <- spTransform(x, CRS('+proj=lcc +lat_1=-28 +lat_2=-36 +lat_0=-32 +lon_0=135 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs '))
-au = autoKrige(Soil_CN ~1, x)
+au = autoKrige(Soil_CN ~ , x)
 
 #get digital elevation model with both with 
 
