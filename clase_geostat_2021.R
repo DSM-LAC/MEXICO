@@ -32,7 +32,7 @@
 getwd()
 #'definir directorio de trabajo
 #+, attr.source='.numberLines startFrom="2"'
-setwd("/Users/marioguevara/Downloads/clase")
+setwd("~/Downloads")
 #'librarias necesarias
 
 #'install.packages(c('raster', 'automap', 'rgdal'))
@@ -41,42 +41,11 @@ library(raster)
 library(rgdal)
 library(automap)
 library(gstat)
-library(maps)
-library(automap)
-
-#funcion para medir tiempo
-
-###benchmark tool
-
-
-#funcion para medir tiempo
-CronometroON<- function(){
-      tic<-proc.time()[3]
-      assign(".tic", tic, envir=baseenv())
-      invisible(tic)
-      }
-CronometroOFF<- function(){
-      tic <- get(".tic", envir=baseenv())
-      toc<-proc.time()[3]-tic
-      hrs<-as.integer(toc/3600)
-      minu<- as.integer(((toc/3600)-hrs)*60)
-      seg<- ((((((toc/3600)-hrs)*60)))-minu)*60
-      time<-paste(as.character(hrs),"hrs ",as.character(minu),"min ",as.character(round(seg,digit=2)),"seg",sep="")
-      return(time)
-      }
-CronometroON()
-print('una oracion larga puede tardar mas que una oracion corta')
-CronometroOFF()
-CronometroON()
-print('si o no?')
-CronometroOFF()
-
-
 
 #TODOS LOS INSUMOS
 #'leer la base de datos de trabajo
 srdb <- read.csv('https://raw.githubusercontent.com/bpbond/srdb/master/srdb-data.csv')
-country <- 'FRA'
+country <- 'USA'
 
 #'pregunta a R como funciona getData
 #'?getData
@@ -94,55 +63,49 @@ class(lim)
 class(srdb)
 str(srdb)
 #ver nombres
- names(srdb)
- #selecciona variables
-  RS <-  srdb[c('Longitude' , 'Latitude', 'Rs_annual')]
+names(srdb)
+#selecciona variables
+RS <-  srdb[c('Longitude' , 'Latitude', 'Rs_annual')]
 #'resumen de la base de datos
 summary(RS)
 #'selecciona variables especificas de otra base de datos
- #'plot(soilCN$Longitude, soilCN$Latitude)
- #'nombres de las variables en base de datos 
- plot(srdb$Longitude, srdb$Latitude)
-#'sobrepongan puntos
-points(RS$Longitude, RS$Latitude, col='blue')
-#'quitamos valores no asignados
-RS <- na.omit(RS)
- #' conocer la distribucion estadistica de los datos
+#'plot(soilCN$Longitude, soilCN$Latitude)
+#'nombres de las variables en base de datos 
+plot(srdb$Longitude, srdb$Latitude)
+#' conocer la distribucion estadistica de los datos
 hist(RS$Rs_annual)
 #'vemos en logaritmo
 hist(log1p(RS$Rs_annual))
 #'agregamos una columna con los datos transformados
 RS$RS_log <- log1p(RS$Rs_annual)
+#'quitamos valores no asignados
+RS <- na.omit(RS)
 #'resumen estadistico
 summary(RS)
 #desviacion standard
 apply(RS, 2, sd)
- #'define un objeto espacial
- coordinates(RS) <- ~ Longitude + Latitude
- #'define CRS
- proj4string(RS) <- CRS( '+proj=longlat +datum=WGS84')
-   #+ results=FALSE, warnings=FALSE
-variogram <- autofitVariogram(Rs_annual ~ 1, RS)
+#'define un objeto espacial
+coordinates(RS) <- ~ Longitude + Latitude
+#'define CRS
+proj4string(RS) <- CRS( '+proj=longlat +datum=WGS84')
+#+ results=FALSE, warnings=FALSE
+(variogram <- autofitVariogram(RS_log ~ 1, RS))
 plot(variogram)
 #nugget/sill
 #0.22 
+plot(RS)
 #reproyecta el limite a un sistema de coordenadas plano
 lim_proj <- spTransform(lim, CRS('+proj=lcc +lat_1=-28 +lat_2=-36 +lat_0=-32 +lon_0=135 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs '))
-
 #reproyecta los puntos limite a un sistema de coordenadas plano
-
 RSproj <- spTransform(RS, CRS('+proj=lcc +lat_1=-28 +lat_2=-36 +lat_0=-32 +lon_0=135 +x_0=1000000 +y_0=2000000 +ellps=GRS80 +units=m +no_defs '))
-
 #recorta el limite de Francia
 RS_projFRA <- RSproj [lim_proj,]
-#comienza a medir tiempo
-CronometroON()
 #kriging
-au = autoKrige(Rs_annual ~ 1. , RS_projFRA, lim_proj )
-#deja de medir tiempo
-CronometroOFF()
+#au = autoKrige(Rs_annual ~ 1. , RS_projFRA, lim_proj )
 ###Ejercicio 1 como cambia la estructura espacial con el area de interes y con el numero de datos? 
-###Ejercicio 2 como cambia el tiempo de computo con areas de distintos numeros de datos?
+###Fin
+
+###Ejercicio 1 como cambia la estructura espacial con el area de interes y con el numero de datos? 
 ###Fin
 
 
